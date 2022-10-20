@@ -1,100 +1,110 @@
 import "./App.css";
-import { Input, Table } from "antd";
+import { Button, Input, Table } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import { DatePicker, Space } from "antd";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 function App() {
-  const data = [
-    {
-      nama: "jun",
-      age: 12,
-      hoby: "mangan",
-      key: 1,
-    },
-    {
-      nama: "jan",
-      age: 11,
-      hoby: "belajar",
-      key: 2,
-    },
-    {
-      nama: "rudy",
-      age: 22,
-      hoby: "kerjo",
-      key: 3,
-    },
-    {
-      nama: "uwu",
-      age: 32,
-      hoby: "mangan",
-      key: 4,
-    },
-    {
-      nama: "lan",
-      age: 41,
-      hoby: "belajar",
-      key: 5,
-    },
-    {
-      nama: "rady",
-      age: 21,
-      hoby: "kerjo",
-      key: 6,
-    },
-  ];
-  const pencarian = (dataindex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
+  const [dapat, setDapat] = useState([]);
+  const getapi = async () => {
+    try {
+      const res = await axios.get("https://fakestoreapi.com/carts");
+      setDapat(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  console.log(dapat);
+
+  useEffect(() => {
+    getapi();
+  }, []);
+
+  const dicari = (datanya) => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+    }) => {
       return (
-        <Input
-          autoFocus
-          placeholder="text here"
-          value={selectedKeys[0]}
-          onChange={(e) => {
-            setSelectedKeys(e.target.value && [e.target.value]);
-          }}
-          onPressEnter={() => {
-            confirm();
-          }}
-          onBlur={() => {
-            confirm();
-          }}
-        ></Input>
+        <div style={{ display: "flex" }}>
+          <Input
+            autoFocus={true}
+            placeholder="text here"
+            value={selectedKeys[0]}
+            onChange={(e) => {
+              setSelectedKeys(e.target.value ? [e.target.value] : []);
+              confirm({ closeDropdown: false });
+            }}
+            onPressEnter={() => {
+              confirm();
+            }}
+            onBlur={() => {
+              confirm();
+            }}
+          ></Input>
+          <Button
+            type="primary"
+            onClick={() => {
+              confirm();
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            type="danger"
+            onClick={() => {
+              clearFilters();
+              confirm();
+            }}
+          >
+            Reset
+          </Button>
+        </div>
       );
     },
     filterIcon: () => {
       return <SearchOutlined />;
     },
     onFilter: (value, record) => {
-      console.log(dataindex);
-      return record.nama.toLowerCase().includes(value.toLowerCase());
+      return record[datanya] == value;
     },
   });
+
   const columns = [
     {
-      title: "Nama",
-      dataIndex: "nama",
-      key: "key",
-      ...pencarian("nama"),
+      title: "id",
+      dataIndex: "id",
+      key: "id",
+      ...dicari("id"),
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "key",
-      sorter: (a, b) => a.age - b.age,
+      title: "User",
+      dataIndex: "userId",
+      key: "userId",
+      ...dicari("userId"),
     },
     {
-      title: "Hoby",
-      dataIndex: "hoby",
-      key: "key",
-      ...pencarian("hoby"),
+      title: "Tanggal",
+      dataIndex: "date",
+      key: "data",
+      ...dicari("date"),
     },
   ];
+  const { RangePicker } = DatePicker;
+
   return (
     <>
-      <div>
+      <div style={{ padding: "100px", backgroundColor: "lightblue" }}>
+        <Space style={{ paddingBottom: "20px" }}>
+          <RangePicker />
+        </Space>
         <Table
-          dataSource={data}
-          style={{ padding: "100px", backgroundColor: "lightblue" }}
+          dataSource={dapat}
           columns={columns}
+          rowKey={(record) => record.id}
         />
       </div>
     </>
