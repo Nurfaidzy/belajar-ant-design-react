@@ -1,27 +1,22 @@
 import "./App.css";
-import { Button, Input, Table } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { catch_api } from "./Redux/Action/getApiAction";
+
+import { Table, Input, Button } from "antd";
 import { DatePicker, Space } from "antd";
-import axios from "axios";
-import { useEffect, useState } from "react";
 
 function App() {
-  const [dapat, setDapat] = useState([]);
-  const getapi = async () => {
-    try {
-      const res = await axios.get("https://fakestoreapi.com/carts");
-      setDapat(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  console.log(dapat);
+  const getApi = useSelector((state) => state.getApiReducer);
+  const dispatch = useDispatch();
+  console.log(getApi);
 
   useEffect(() => {
-    getapi();
-  }, []);
+    getApi.data.length === 0 && dispatch(catch_api());
+  }, [dispatch]);
 
-  const dicari = (datanya) => ({
+  //filter
+  const filtering = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -31,8 +26,8 @@ function App() {
       return (
         <div style={{ display: "flex" }}>
           <Input
-            autoFocus={true}
-            placeholder="text here"
+            placeholder="Text at Here"
+            autoFocus
             value={selectedKeys[0]}
             onChange={(e) => {
               setSelectedKeys(e.target.value ? [e.target.value] : []);
@@ -44,17 +39,17 @@ function App() {
             onBlur={() => {
               confirm();
             }}
-          ></Input>
+          />
           <Button
-            type="primary"
+            style={{ backgroundColor: "red", color: "white" }}
             onClick={() => {
               confirm();
             }}
           >
-            Search
+            Sumbit
           </Button>
           <Button
-            type="danger"
+            style={{ backgroundColor: "green", color: "white" }}
             onClick={() => {
               clearFilters();
               confirm();
@@ -65,47 +60,43 @@ function App() {
         </div>
       );
     },
-    filterIcon: () => {
-      return <SearchOutlined />;
-    },
     onFilter: (value, record) => {
-      return record[datanya] == value;
+      console.log(record);
+      return record[dataIndex] == value;
     },
   });
 
-  const columns = [
+  //penamaan colums
+  const colums = [
     {
-      title: "id",
+      title: "Id",
       dataIndex: "id",
       key: "id",
-      ...dicari("id"),
+      ...filtering("id"),
     },
     {
       title: "User",
       dataIndex: "userId",
       key: "userId",
-      ...dicari("userId"),
+      ...filtering("userId"),
     },
     {
-      title: "Tanggal",
+      title: "Date",
       dataIndex: "date",
-      key: "data",
-      ...dicari("date"),
+      key: "date",
     },
   ];
+  //search
+
   const { RangePicker } = DatePicker;
 
   return (
     <>
       <div style={{ padding: "100px", backgroundColor: "lightblue" }}>
-        <Space style={{ paddingBottom: "20px" }}>
+        <Space direction="vertical" size={12} style={{ paddingBottom: "20px" }}>
           <RangePicker />
         </Space>
-        <Table
-          dataSource={dapat}
-          columns={columns}
-          rowKey={(record) => record.id}
-        />
+        <Table columns={colums} dataSource={getApi.data} rowKey={"id"} />
       </div>
     </>
   );
