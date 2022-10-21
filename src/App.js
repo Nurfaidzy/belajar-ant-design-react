@@ -9,7 +9,6 @@ import { DatePicker, Space } from "antd";
 function App() {
   const getApi = useSelector((state) => state.getApiReducer);
   const dispatch = useDispatch();
-  console.log(getApi);
 
   useEffect(() => {
     getApi.data.length === 0 && dispatch(catch_api());
@@ -67,6 +66,13 @@ function App() {
   });
 
   //penamaan colums
+  const spesifik = getApi.data;
+  spesifik.map((isi) => {
+    let tgl = new Date(isi.date);
+    isi.date = tgl.getDate() + "-" + tgl.getMonth() + "-" + tgl.getFullYear();
+    console.log(isi);
+    console.log(tgl);
+  });
   const colums = [
     {
       title: "Id",
@@ -96,7 +102,7 @@ function App() {
         <Space direction="vertical" size={12} style={{ paddingBottom: "20px" }}>
           <RangePicker />
         </Space>
-        <Table columns={colums} dataSource={getApi.data} rowKey={"id"} />
+        <Table columns={colums} dataSource={spesifik} rowKey={"id"} />
       </div>
     </>
   );
