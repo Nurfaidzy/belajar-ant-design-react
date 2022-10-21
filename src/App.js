@@ -5,6 +5,7 @@ import { catch_api } from "./Redux/Action/getApiAction";
 
 import { Table, Input, Button } from "antd";
 import { DatePicker, Space } from "antd";
+import moment from "moment";
 
 function App() {
   const getApi = useSelector((state) => state.getApiReducer);
@@ -60,19 +61,26 @@ function App() {
       );
     },
     onFilter: (value, record) => {
+      console.log(dataIndex);
       console.log(record);
-      return record[dataIndex] == value;
+      if (dataIndex === "date") {
+        return record[dataIndex].toLowerCase().includes(value.toLowerCase());
+      } else {
+        return record[dataIndex] == value;
+      }
     },
   });
 
-  //penamaan colums
+  //mapping data
+  const newer = [];
   const spesifik = getApi.data;
   spesifik.map((isi) => {
-    let tgl = new Date(isi.date);
-    isi.date = tgl.getDate() + "-" + tgl.getMonth() + "-" + tgl.getFullYear();
-    console.log(isi);
-    console.log(tgl);
+    let tgl = moment(isi.date).format("DD-MM-YYYY");
+    isi.date = tgl;
+    newer.push(isi);
   });
+
+  //penamaan colums
   const colums = [
     {
       title: "Id",
@@ -90,6 +98,7 @@ function App() {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      ...filtering("date"),
     },
   ];
   //search
@@ -100,9 +109,16 @@ function App() {
     <>
       <div style={{ padding: "100px", backgroundColor: "lightblue" }}>
         <Space direction="vertical" size={12} style={{ paddingBottom: "20px" }}>
-          <RangePicker />
+          <RangePicker
+            onChange={(e) => {
+              const date1 = e.map((value) => {
+                return moment(value).format("DD-MM-YYYY");
+              });
+              console.log(date1);
+            }}
+          />
         </Space>
-        <Table columns={colums} dataSource={spesifik} rowKey={"id"} />
+        <Table columns={colums} dataSource={newer} rowKey={"id"} />
       </div>
     </>
   );
