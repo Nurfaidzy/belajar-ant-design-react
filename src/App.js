@@ -57,6 +57,17 @@ function App() {
           >
             Reset
           </Button>
+          <Space direction="vertical">
+            <DatePicker
+              onChange={(e) => {
+                console.log("pertama", e);
+                const ubah = moment(e).format("DD-MM-YYYY");
+                console.log("kedua", ubah);
+                setSelectedKeys(ubah ? [ubah] : []);
+                confirm();
+              }}
+            />
+          </Space>
         </div>
       );
     },
